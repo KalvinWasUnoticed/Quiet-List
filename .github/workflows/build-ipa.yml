@@ -1,0 +1,49 @@
+name: Build iPhone IPA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install project generator
+        run: brew install xcodegen
+      - name: Generate Xcode project
+        run: xcodegen generate
+      - name: Build for a physical iPhone (unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild -project QuietList.xcodeproj -scheme QuietList \
+            -configuration Release -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            CONFIGURATION_BUILD_DIR="$RUNNER_TEMP/QuietListBuild" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            build | tee "$RUNNER_TEMP/build.log"
+      - name: Package unsigned IPA
+        run: |
+          mkdir -p "$RUNNER_TEMP/package/Payload"
+          cp -R "$RUNNER_TEMP/QuietListBuild/QuietList.app" "$RUNNER_TEMP/package/Payload/"
+          test -f "$RUNNER_TEMP/package/Payload/QuietList.app/QuietList"
+          cd "$RUNNER_TEMP/package"
+          /usr/bin/zip -qr "$GITHUB_WORKSPACE/QuietList-unsigned.ipa" Payload
+          unzip -l "$GITHUB_WORKSPACE/QuietList-unsigned.ipa"
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: QuietList-unsigned-IPA
+          path: QuietList-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: ${{ runner.temp }}/build.log
+          if-no-files-found: ignore
