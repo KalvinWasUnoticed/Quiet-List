@@ -15,35 +15,7 @@ A small, offline native iPhone to-do app. Designed for iPhone 14; requires iOS 1
 
 There is no cloud sync, export, or recovery of deleted tasks. Removing the app can remove your list. Refresh the existing installation rather than uninstalling it.
 
-## 1. Put this project on GitHub
-
-Create a GitHub repository, then upload the **contents of this folder**, not the enclosing `QuietList` folder. The repository root must contain:
-
-```
-.github/workflows/build-ipa.yml
-QuietList/
-project.yml
-README.md
-```
-
-**Important:** `.github` is a hidden folder on many computers. On macOS, Command–Shift–Period shows hidden files; in Windows Explorer, enable View → Show → Hidden items.
-
-If using GitHub’s website and the hidden folder isn’t uploaded, choose **Add file → Create new file**, enter `.github/workflows/build-ipa.yml` as the filename, paste the contents of the supplied workflow, and commit it. The workflow must be at that exact path.
-
-Alternatively, from this extracted folder, with Git installed:
-
-```sh
-git init
-git add .
-git commit -m "Add Quiet List"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
-git push -u origin main
-```
-
-Use a new empty remote repository for those commands. GitHub Actions availability and billing depend on your account and repository; check your Actions allowance before running a macOS job, particularly in a private repository. Do not upload your Apple password or signing credentials.
-
-## 2. Build and download the IPA
+## 1. Build and download the IPA
 
 1. Open the repository’s **Actions** tab. Enable workflows if prompted.
 2. Select **Build iPhone IPA**.
@@ -56,7 +28,7 @@ The artifact is retained for 14 days; keep your downloaded copy or rerun the bui
 
 The workflow installs XcodeGen, generates an Xcode project, compiles an ARM64 iPhone app using Apple’s SDK on a GitHub macOS runner, and packages it as `Payload/QuietList.app` inside the IPA. It does not sign or distribute the app through Apple.
 
-## 3. Sign and install on your iPhone 14
+## 2. Sign and install on your iPhone 14
 
 An unsigned IPA cannot be installed by simply opening it in Files or AirDropping it. It must be signed for your device.
 
